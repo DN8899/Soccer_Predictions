@@ -17,10 +17,11 @@ public class Main {
 	private static String dataUrl = "jdbc:mysql://localhost:3306/soccer_leagues";
 	private static String userName = "root";
 	private static String password = "DandB#8899";
-	ConnectDatabase databaseConnection = new ConnectDatabase();
 	
 	
-	public static void main(String[] args) throws Exception{
+	
+	public static void main(String[] args) throws Exception {
+		DataRetrievals retrieve = new DataRetrievals();
 		/*
 		//SQL Variables
 		String dataUrl = "jdbc:mysql://localhost:3306/soccer_leagues";
@@ -66,14 +67,14 @@ public class Main {
 			
 		
 		//final String bet = "https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures";
-		String stats = "https://fbref.com/en/comps/9/Premier-League-Stats";
+		String statsUrl = "https://fbref.com/en/comps/9/Premier-League-Stats";
 		
 		//Create database connection 
 		ConnectDatabase databaseConnection = new ConnectDatabase(dataUrl, userName, password);
 		
 		try {
 				
-			final Document statDoc = Jsoup.connect(stats).get();
+			final Document statDoc = Jsoup.connect(statsUrl).get();
 			
 			//---------------------------------------Premier League Group-------------------------------------
 			
@@ -99,22 +100,7 @@ public class Main {
 			//--------------------------------------XA RETRIVIAL----------------------------------
 			
 			
-			String[] xAFinal = new String[20];
-			for (Element row : statDoc.select("#stats_squads_standard_for"))			
-			{
-				String xGName = row.select("[data-stat='assists_per90']").text();	
-				xAFinal = xGName.split(" ");
-			}
-			for (int i = 1; i < 21; i++) {
-				System.out.println(xAFinal[i]);
-				String sql = "UPDATE englandteams" + 
-						" SET xAG = " + xAFinal[i] +
-						" WHERE teamID = " + i;
-				databaseConnection.returnStmt(sql);
-				count++;
-			
-			}
-				
+			retrieve.retrieveXAG();
 			
 			
 			//--------------------------------------------XG RETRIVIAL-------------------------------------------------------------
@@ -199,13 +185,14 @@ public class Main {
 				}*/
 			
 		}
+		
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		finally {
 			databaseConnection.closeStatement();
 			databaseConnection.closeConnection();
-		}
+		} 
 		
 	}
 
