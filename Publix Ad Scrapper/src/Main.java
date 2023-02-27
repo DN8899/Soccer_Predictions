@@ -18,10 +18,18 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		DataRetrievals retrieve = new DataRetrievals();
 		
-		retrieve.retrieveXG();
-		retrieve.retrieveXAG();
-		System.out.println(retrieve.getDate());
-		System.out.println(retrieve.getSevenDaysDate());
+		//retrieve.retrieveXG();
+		//retrieve.retrieveXAG();
+		//System.out.println(retrieve.getDate());
+		//System.out.println(retrieve.getSevenDaysDate());
+		
+		String[] team = retrieve.getGameName();
+		for (int i = 0; i < team.length; i++) {
+			System.out.println(team[i]);
+		}
+		
+		
+		
 		
 			//---------------------------------------XG AGAINST RETRIVIAL---------------------------------------
 		

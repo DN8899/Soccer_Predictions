@@ -1,6 +1,8 @@
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Scanner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,7 +42,7 @@ public class DataRetrievals extends ConnectDatabase {
 				String sql = "UPDATE englandteams" + 
 						" SET xAG = " + xAFinal[i] +
 						" WHERE teamID = " + i;
-				databaseConnection.returnStmt(sql);
+				databaseConnection.returnUpdateStmt(sql);
 			}
 			
 		} catch(Exception e) {
@@ -76,7 +78,7 @@ public class DataRetrievals extends ConnectDatabase {
 				String sql = "UPDATE englandteams" + 
 						" SET xG = " + xGFinal[i] +
 						" WHERE teamID = " + i;
-				databaseConnection.returnStmt(sql);
+				databaseConnection.returnUpdateStmt(sql);
 			}
 			
 		} catch(Exception e) {
@@ -98,21 +100,98 @@ public class DataRetrievals extends ConnectDatabase {
 		return addedDate;
 	}
 	
-	public String getGameName() throws ClassNotFoundException, SQLException {
+	
+	public String[] getGameName() throws ClassNotFoundException, SQLException {
 		String dataUrl = myVariables.getUrl();
 		String userName = myVariables.getUserName();
 		String password = myVariables.getPassword();
+		String theTeam = userInput();
+		int count = 0;
 		
+		String[] outTeams = new String[2];
 		String sql = "select teamHome, teamAway from englandmatchmain \r\n"
-				+ "		where gametime between '2023-02-26' and '2023-03-05'\r\n"
-				+ "		AND teamHome = 'Arsenal' ";
+				+ "		where gametime between '"+getDate()+"' and '"+getSevenDaysDate()+"'\r\n"
+				+ "		AND (teamHome = '"+theTeam+"' OR teamAway = '"+theTeam+"') ";
+		
 		ConnectDatabase databaseConnection = new ConnectDatabase(dataUrl, userName, password);
 		
-		databaseConnection.returnStmt(sql);
+		ResultSet rs = databaseConnection.returnStmt().executeQuery(sql);
 		
-		//temp
-		return null;
+		/*
+		 * Search through both home and away columns of game database 
+		 * returns the team that was asked for
+		 */
+		while (rs.next()) {
+			if (rs.getString("teamHome").equals(theTeam)) {
+				//call on prediction function here
+				outTeams[count] = theTeam;
+				count++;
+				//Need to get against team
+				outTeams[count] = rs.getString("teamAway");
+				break;
+			}
+			
+			if (rs.getString("teamAway").equals(theTeam)) {
+				//TEMP
+				//out = "AWAY GOOO";
+				break;
+			}
+		}
+		
+		databaseConnection.closeStatement();
+		databaseConnection.closeConnection();
+		
+		return outTeams;
 	}
 	
-
+	/*
+	 * Helper method for getGameName() method
+	 */
+	private String userInput() throws ClassNotFoundException, SQLException {
+		Scanner scan = new Scanner(System.in);
+		System.out.println("This is a list of the current Premier League teams");
+		
+		String[] teams = teamList();
+		for (int i = 0; i < teams.length; i++) {
+			System.out.print(teams[i] + " | ");
+			if (i == 19) {
+				System.out.print("\n");
+			}
+		}
+		
+		System.out.println("From these teams, choose one to predict their next match");
+		String userTeam = scan.nextLine();
+		
+		scan.close();
+		
+		return userTeam;
+	}
+	
+	/*
+	 * Gets an array of the teams from the englandteams database
+	 */
+	private String[] teamList() throws SQLException, ClassNotFoundException {
+		String dataUrl = myVariables.getUrl();
+		String userName = myVariables.getUserName();
+		String password = myVariables.getPassword();
+		ConnectDatabase databaseConnection = new ConnectDatabase(dataUrl, userName, password);
+		int i = 0;
+		
+		String[] teams = new String[20];
+		
+		String sql = "select teamName from englandteams";
+			
+		ResultSet rs = databaseConnection.returnStmt().executeQuery(sql);
+		while (rs.next()) {
+			teams[i] = rs.getString("teamName");
+			i++;
+		}
+		
+		databaseConnection.closeStatement();
+		databaseConnection.closeConnection();
+		
+		return teams;
+	}
+	
+	
 }
