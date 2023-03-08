@@ -143,10 +143,14 @@ public class DataRetrievals extends ConnectDatabase {
 				outTeams[count] = rs.getString("teamAway");
 				break;
 			}
-			
-			if (rs.getString("teamAway").equals(theTeam)) {
+			else if  (rs.getString("teamAway").equals(theTeam)) {
+				outTeams[count] = theTeam;
+				count++;
+				outTeams[count] = rs.getString("teamHome");
 				break;
 			}
+			
+			
 		}
 	
 		teamOneName = outTeams[0];
